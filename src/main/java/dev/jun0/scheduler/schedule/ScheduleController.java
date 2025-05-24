@@ -2,6 +2,8 @@ package dev.jun0.scheduler.schedule;
 
 
 import dev.jun0.scheduler.schedule.dto.ScheduleCreateRequest;
+import dev.jun0.scheduler.schedule.dto.ScheduleDeleteRequest;
+import dev.jun0.scheduler.schedule.dto.SchedulePatchRequest;
 import dev.jun0.scheduler.schedule.dto.ScheduleResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -35,5 +37,17 @@ public class ScheduleController {
                                           @RequestParam(required = false) String author) {
         List<ScheduleResponse> scheduleResponses = scheduleService.getSchedules(updatedDate, author);
         return new ResponseEntity<>(scheduleResponses, HttpStatus.OK);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> patchSchedules(@PathVariable Long id, @RequestBody SchedulePatchRequest request) {
+        ScheduleResponse scheduleResponse = scheduleService.patchSchedules(id, request);
+        return new ResponseEntity<>(scheduleResponse, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteSchedules(@PathVariable Long id, @RequestBody ScheduleDeleteRequest request) {
+        scheduleService.deleteSchedules(id, request);
+        return new ResponseEntity<>("정상적으로 삭제되었습니다.", HttpStatus.OK);
     }
 }
