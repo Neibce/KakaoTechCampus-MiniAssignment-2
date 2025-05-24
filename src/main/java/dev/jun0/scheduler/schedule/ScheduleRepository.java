@@ -1,5 +1,6 @@
 package dev.jun0.scheduler.schedule;
 
+import dev.jun0.scheduler.schedule.dto.ScheduleResponse;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -10,6 +11,6 @@ import java.util.Optional;
 public interface ScheduleRepository {
     void save(Schedule schedule);
 
-    Optional<Schedule> findById(Long id);
-    List<Schedule> findAll(LocalDate modifiedAt, String author);
+    Optional<ScheduleResponse> findById(Long id);
+    List<ScheduleResponse> findAll(LocalDate modifiedAt, String author);
 }

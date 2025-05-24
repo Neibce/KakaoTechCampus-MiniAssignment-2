@@ -1,6 +1,7 @@
 package dev.jun0.scheduler.schedule;
 
 import dev.jun0.scheduler.schedule.dto.ScheduleCreateRequest;
+import dev.jun0.scheduler.schedule.dto.ScheduleResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +16,7 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
 
     @Transactional
-    public void createSchedule(ScheduleCreateRequest request) {
+    public ScheduleResponse createSchedule(ScheduleCreateRequest request) {
         Schedule schedule = new Schedule(
                 request.getId(),
                 request.getTask(),
@@ -25,16 +26,23 @@ public class ScheduleService {
                 LocalDateTime.now()
         );
         scheduleRepository.save(schedule);
+        return new ScheduleResponse(
+                schedule.getId(),
+                schedule.getTask(),
+                schedule.getAuthor(),
+                schedule.getCreatedAt(),
+                schedule.getUpdatedAt()
+        );
     }
 
     @Transactional(readOnly = true)
-    public Schedule getSchedule(Long id) {
+    public ScheduleResponse getSchedule(Long id) {
         return scheduleRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("일정을 찾을 수 없습니다"));
     }
 
     @Transactional(readOnly = true)
-    public List<Schedule> getSchedules(LocalDate updatedDate, String author) {
+    public List<ScheduleResponse> getSchedules(LocalDate updatedDate, String author) {
         return scheduleRepository.findAll(updatedDate, author);
     }
 }

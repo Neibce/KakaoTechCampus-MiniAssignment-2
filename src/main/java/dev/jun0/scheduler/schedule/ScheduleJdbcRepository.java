@@ -1,5 +1,6 @@
 package dev.jun0.scheduler.schedule;
 
+import dev.jun0.scheduler.schedule.dto.ScheduleResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -18,11 +19,10 @@ import java.util.Optional;
 public class ScheduleJdbcRepository implements ScheduleRepository {
     private final JdbcTemplate jdbc;
 
-    private final RowMapper<Schedule> scheduleMapper = (rs, rowNum) -> new Schedule(
+    private final RowMapper<ScheduleResponse> scheduleMapper = (rs, rowNum) -> new ScheduleResponse(
             rs.getLong("id"),
             rs.getString("task"),
             rs.getString("author"),
-            rs.getString("password"),
             rs.getTimestamp("created_at").toLocalDateTime(),
             rs.getTimestamp("updated_at").toLocalDateTime()
     );
@@ -42,14 +42,14 @@ public class ScheduleJdbcRepository implements ScheduleRepository {
     }
 
     @Override
-    public Optional<Schedule> findById(Long id) {
+    public Optional<ScheduleResponse> findById(Long id) {
         String sql = "SELECT * FROM schedules WHERE id = ?";
-        List<Schedule> results = jdbc.query(sql, scheduleMapper, id);
+        List<ScheduleResponse> results = jdbc.query(sql, scheduleMapper, id);
         return results.stream().findFirst();
     }
 
     @Override
-    public List<Schedule> findAll(LocalDate updatedDate, String author) {
+    public List<ScheduleResponse> findAll(LocalDate updatedDate, String author) {
         String sql = "SELECT * FROM schedules WHERE 1=1";
         List<Object> params = new ArrayList<>();
 

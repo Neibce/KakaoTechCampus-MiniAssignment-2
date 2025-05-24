@@ -2,6 +2,7 @@ package dev.jun0.scheduler.schedule;
 
 
 import dev.jun0.scheduler.schedule.dto.ScheduleCreateRequest;
+import dev.jun0.scheduler.schedule.dto.ScheduleResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -19,20 +20,20 @@ public class ScheduleController {
 
     @PostMapping
     public ResponseEntity<?> createSchedule(@RequestBody ScheduleCreateRequest request) {
-        scheduleService.createSchedule(request);
-        return new ResponseEntity<>("일정이 생성되었습니다.", HttpStatus.CREATED);
+        ScheduleResponse scheduleResponse = scheduleService.createSchedule(request);
+        return new ResponseEntity<>(scheduleResponse, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getSchedule(@PathVariable Long id) {
-        Schedule schedule = scheduleService.getSchedule(id);
-        return new ResponseEntity<>(schedule, HttpStatus.OK);
+        ScheduleResponse scheduleResponse = scheduleService.getSchedule(id);
+        return new ResponseEntity<>(scheduleResponse, HttpStatus.OK);
     }
 
     @GetMapping
     public ResponseEntity<?> getSchedules(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate updatedDate,
                                           @RequestParam(required = false) String author) {
-        List<Schedule> schedules = scheduleService.getSchedules(updatedDate, author);
-        return new ResponseEntity<>(schedules, HttpStatus.OK);
+        List<ScheduleResponse> scheduleResponses = scheduleService.getSchedules(updatedDate, author);
+        return new ResponseEntity<>(scheduleResponses, HttpStatus.OK);
     }
 }
