@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -17,21 +16,10 @@ public class ScheduleService {
 
     @Transactional
     public ScheduleResponse createSchedule(ScheduleCreateRequest request) {
-        Schedule schedule = new Schedule(
-                request.getId(),
+        return scheduleRepository.save(
                 request.getTask(),
                 request.getAuthor(),
-                request.getPassword(),
-                LocalDateTime.now(),
-                LocalDateTime.now()
-        );
-        scheduleRepository.save(schedule);
-        return new ScheduleResponse(
-                schedule.getId(),
-                schedule.getTask(),
-                schedule.getAuthor(),
-                schedule.getCreatedAt(),
-                schedule.getUpdatedAt()
+                request.getPassword()
         );
     }
 

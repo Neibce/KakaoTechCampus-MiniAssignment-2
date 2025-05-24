@@ -4,12 +4,15 @@ import dev.jun0.scheduler.schedule.dto.ScheduleResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,17 +31,23 @@ public class ScheduleJdbcRepository implements ScheduleRepository {
     );
 
     @Override
-    public void save(Schedule schedule) {
+    public ScheduleResponse save(String task, String author, String password) {
         String sql = "INSERT INTO schedules(task, author, password, created_at, updated_at) VALUES (?, ?, ?, ?, ?)";
+        LocalDateTime now = LocalDateTime.now();
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbc.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, schedule.getTask());
-            ps.setString(2, schedule.getAuthor());
-            ps.setString(3, schedule.getPassword());
-            ps.setTimestamp(4, Timestamp.valueOf(schedule.getCreatedAt()));
-            ps.setTimestamp(5, Timestamp.valueOf(schedule.getUpdatedAt()));
+            ps.setString(1, task);
+            ps.setString(2, author);
+            ps.setString(3, password);
+            ps.setTimestamp(4, Timestamp.valueOf(now));
+            ps.setTimestamp(5, Timestamp.valueOf(now));
             return ps;
-        });
+        }, keyHolder);
+
+        Long generatedId = keyHolder.getKey().longValue();
+        return new ScheduleResponse(generatedId, task, author, now, now);
     }
 
     @Override
