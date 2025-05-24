@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS schedules (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+
+    task VARCHAR(255) NOT NULL,
+    author VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL
+);
