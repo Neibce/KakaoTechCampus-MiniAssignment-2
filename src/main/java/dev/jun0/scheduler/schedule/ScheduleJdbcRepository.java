@@ -51,6 +51,43 @@ public class ScheduleJdbcRepository implements ScheduleRepository {
     }
 
     @Override
+    public ScheduleResponse update(Long id, String task, String author) {
+        String sql = "UPDATE schedules SET ";
+        List<Object> params = new ArrayList<>();
+
+        if (task != null) {
+            sql += "task = ?, ";
+            params.add(task);
+        }
+
+        if (author != null) {
+            sql += "author = ?, ";
+            params.add(author);
+        }
+        sql += "updated_at = ? WHERE id = ?";
+        params.add(LocalDateTime.now());
+        params.add(id);
+
+        jdbc.update(sql, params.toArray());
+
+        String selectSql = "SELECT * FROM schedules WHERE id = ?";
+        return jdbc.queryForObject(selectSql, scheduleMapper, id);
+    }
+
+    @Override
+    public void delete(Long id) {
+        String sql = "DELETE FROM schedules WHERE id = ?";
+        jdbc.update(sql, id);
+    }
+
+    @Override
+    public boolean isPasswordValid(Long id, String password) {
+        String sql = "SELECT COUNT(*) FROM schedules WHERE id = ? AND password = ?";
+        Integer count = jdbc.queryForObject(sql, Integer.class, id, password);
+        return count != null && count > 0;
+    }
+
+    @Override
     public Optional<ScheduleResponse> findById(Long id) {
         String sql = "SELECT * FROM schedules WHERE id = ?";
         List<ScheduleResponse> results = jdbc.query(sql, scheduleMapper, id);
