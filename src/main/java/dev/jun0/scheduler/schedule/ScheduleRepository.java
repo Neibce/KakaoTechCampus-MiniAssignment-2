@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface ScheduleRepository {
-    void save(Schedule schedule);
+    ScheduleResponse save(String task, String author, String password);
 
     Optional<ScheduleResponse> findById(Long id);
     List<ScheduleResponse> findAll(LocalDate modifiedAt, String author);
