@@ -1,7 +1,9 @@
 package dev.jun0.scheduler.schedule;
 
+import dev.jun0.scheduler.schedule.dto.ScheduleAuthorNameResponse;
 import dev.jun0.scheduler.schedule.dto.ScheduleResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -38,6 +40,15 @@ public class ScheduleJdbcRepository implements ScheduleRepository {
                 rs.getTimestamp("updated_at").toLocalDateTime()
         );
     };
+
+    private final RowMapper<ScheduleAuthorNameResponse> scheduleAuthorNameMapper = (rs, rowNum) ->
+            new ScheduleAuthorNameResponse(
+                    rs.getLong("id"),
+                    rs.getString("task"),
+                    rs.getString("name"),
+                    rs.getTimestamp("created_at").toLocalDateTime(),
+                    rs.getTimestamp("updated_at").toLocalDateTime()
+            );
 
     @Override
     public ScheduleResponse save(String task, String authorUuid, String password) {
@@ -104,24 +115,25 @@ public class ScheduleJdbcRepository implements ScheduleRepository {
     }
 
     @Override
-    public List<ScheduleResponse> findAll(LocalDate updatedDate, String authorUuid) {
-        String sql = "SELECT * FROM schedules WHERE 1=1";
+    public List<ScheduleAuthorNameResponse> findAll(LocalDate updatedDate, String authorUuid, Pageable pageable) {
+        String sql = "SELECT schedules.*, users.name FROM schedules JOIN users ON schedules.author = users.uuid WHERE 1=1";
 
         List<Object> params = new ArrayList<>();
         if (updatedDate != null) {
-            sql += " AND DATE(updated_at) = ?";
+            sql += " AND DATE(schedules.updated_at) = ?";
             params.add(updatedDate);
         }
         if (authorUuid != null && !authorUuid.isEmpty()) {
-            sql += " AND author = UUID_TO_BIN(?)";
+            sql += " AND schedules.author = UUID_TO_BIN(?)";
             params.add(authorUuid);
         }
-        sql += " ORDER BY updated_at DESC";
+        sql += " ORDER BY schedules.updated_at DESC";
 
-        if (!params.isEmpty())
-            return jdbc.query(sql, scheduleMapper, params.toArray());
-        else
-            return jdbc.query(sql, scheduleMapper);
+        sql += " LIMIT ? OFFSET ?";
+        params.add(pageable.getPageSize());
+        params.add(pageable.getPageNumber() * pageable.getPageSize());
+
+        return jdbc.query(sql, scheduleAuthorNameMapper, params.toArray());
     }
 
 }
