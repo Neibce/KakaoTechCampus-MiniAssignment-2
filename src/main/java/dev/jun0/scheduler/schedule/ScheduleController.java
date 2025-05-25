@@ -2,6 +2,7 @@ package dev.jun0.scheduler.schedule;
 
 
 import dev.jun0.scheduler.schedule.dto.*;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Pageable;
@@ -20,7 +21,7 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
 
     @PostMapping
-    public ResponseEntity<?> createSchedule(@RequestBody ScheduleCreateRequest request) {
+    public ResponseEntity<?> createSchedule(@RequestBody @Valid ScheduleCreateRequest request) {
         ScheduleResponse scheduleResponse = scheduleService.createSchedule(request);
         return new ResponseEntity<>(scheduleResponse, HttpStatus.CREATED);
     }
