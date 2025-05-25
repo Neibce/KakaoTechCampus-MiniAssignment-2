@@ -1,7 +1,8 @@
 package dev.jun0.scheduler.schedule;
 
+import dev.jun0.scheduler.schedule.dto.ScheduleAuthorNameResponse;
 import dev.jun0.scheduler.schedule.dto.ScheduleResponse;
-import dev.jun0.scheduler.user.User;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -16,5 +17,5 @@ public interface ScheduleRepository {
     boolean isPasswordValid(Long id, String password);
 
     Optional<ScheduleResponse> findById(Long id);
-    List<ScheduleResponse> findAll(LocalDate modifiedAt, String authorUuid);
+    List<ScheduleAuthorNameResponse> findAll(LocalDate modifiedAt, String authorUuid, Pageable pageable);
 }

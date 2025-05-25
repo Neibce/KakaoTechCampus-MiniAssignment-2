@@ -1,11 +1,10 @@
 package dev.jun0.scheduler.schedule;
 
 
-import dev.jun0.scheduler.schedule.dto.ScheduleCreateRequest;
-import dev.jun0.scheduler.schedule.dto.ScheduleDeleteRequest;
-import dev.jun0.scheduler.schedule.dto.SchedulePatchRequest;
-import dev.jun0.scheduler.schedule.dto.ScheduleResponse;
+import dev.jun0.scheduler.schedule.dto.*;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,9 +33,9 @@ public class ScheduleController {
 
     @GetMapping
     public ResponseEntity<?> getSchedules(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate updatedDate,
-                                          @RequestParam(required = false) String author) {
-        List<ScheduleResponse> scheduleResponses = scheduleService.getSchedules(updatedDate, author);
-        return new ResponseEntity<>(scheduleResponses, HttpStatus.OK);
+                                          @RequestParam(required = false) String author, Pageable pageable) {
+        List<ScheduleAuthorNameResponse> scheduleAuthorNameResponses = scheduleService.getSchedules(updatedDate, author, pageable);
+        return new ResponseEntity<>(scheduleAuthorNameResponses, HttpStatus.OK);
     }
 
     @PatchMapping("/{id}")

@@ -1,12 +1,10 @@
 package dev.jun0.scheduler.schedule;
 
-import dev.jun0.scheduler.schedule.dto.ScheduleCreateRequest;
-import dev.jun0.scheduler.schedule.dto.ScheduleDeleteRequest;
-import dev.jun0.scheduler.schedule.dto.SchedulePatchRequest;
-import dev.jun0.scheduler.schedule.dto.ScheduleResponse;
+import dev.jun0.scheduler.schedule.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -32,8 +30,8 @@ public class ScheduleService {
     }
 
     @Transactional(readOnly = true)
-    public List<ScheduleResponse> getSchedules(LocalDate updatedDate, String authorUuid) {
-        return scheduleRepository.findAll(updatedDate, authorUuid);
+    public List<ScheduleAuthorNameResponse> getSchedules(LocalDate updatedDate, String authorUuid, Pageable pageable) {
+        return scheduleRepository.findAll(updatedDate, authorUuid, pageable);
     }
 
     @Transactional
