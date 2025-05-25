@@ -7,6 +7,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class SchedulePatchRequest {
     private String task;
-    private String author;
+    private String authorUuid;
     private String password;
 }
