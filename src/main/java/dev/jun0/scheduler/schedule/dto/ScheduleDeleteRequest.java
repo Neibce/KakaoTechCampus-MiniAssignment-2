@@ -6,7 +6,5 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class ScheduleDeleteRequest {
-    private String task;
-    private String authorUuid;
     private String password;
 }
