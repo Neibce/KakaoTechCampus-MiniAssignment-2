@@ -8,6 +8,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.nio.ByteBuffer;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Timestamp;
@@ -16,30 +17,38 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
 public class ScheduleJdbcRepository implements ScheduleRepository {
     private final JdbcTemplate jdbc;
 
-    private final RowMapper<ScheduleResponse> scheduleMapper = (rs, rowNum) -> new ScheduleResponse(
-            rs.getLong("id"),
-            rs.getString("task"),
-            rs.getString("author"),
-            rs.getTimestamp("created_at").toLocalDateTime(),
-            rs.getTimestamp("updated_at").toLocalDateTime()
-    );
+    private final RowMapper<ScheduleResponse> scheduleMapper = (rs, rowNum) -> {
+        ByteBuffer byteBuffer = ByteBuffer.wrap(rs.getBytes("author"));
+        long mostSigBits = byteBuffer.getLong();
+        long leastSigBits = byteBuffer.getLong();
+        UUID uuid = new UUID(mostSigBits, leastSigBits);
+
+        return new ScheduleResponse(
+                rs.getLong("id"),
+                rs.getString("task"),
+                uuid.toString(),
+                rs.getTimestamp("created_at").toLocalDateTime(),
+                rs.getTimestamp("updated_at").toLocalDateTime()
+        );
+    };
 
     @Override
-    public ScheduleResponse save(String task, String author, String password) {
-        String sql = "INSERT INTO schedules(task, author, password, created_at, updated_at) VALUES (?, ?, ?, ?, ?)";
+    public ScheduleResponse save(String task, String authorUuid, String password) {
+        String sql = "INSERT INTO schedules(task, author, password, created_at, updated_at) VALUES (?, (UUID_TO_BIN(?)), ?, ?, ?)";
         LocalDateTime now = LocalDateTime.now();
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbc.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, task);
-            ps.setString(2, author);
+            ps.setString(2, authorUuid);
             ps.setString(3, password);
             ps.setTimestamp(4, Timestamp.valueOf(now));
             ps.setTimestamp(5, Timestamp.valueOf(now));
@@ -47,11 +56,11 @@ public class ScheduleJdbcRepository implements ScheduleRepository {
         }, keyHolder);
 
         Long generatedId = keyHolder.getKey().longValue();
-        return new ScheduleResponse(generatedId, task, author, now, now);
+        return new ScheduleResponse(generatedId, task, authorUuid, now, now);
     }
 
     @Override
-    public ScheduleResponse update(Long id, String task, String author) {
+    public ScheduleResponse update(Long id, String task, String authorUuid) {
         String sql = "UPDATE schedules SET ";
         List<Object> params = new ArrayList<>();
 
@@ -60,9 +69,9 @@ public class ScheduleJdbcRepository implements ScheduleRepository {
             params.add(task);
         }
 
-        if (author != null) {
-            sql += "author = ?, ";
-            params.add(author);
+        if (authorUuid != null && !authorUuid.isEmpty()) {
+            sql += "author = (UUID_TO_BIN(?)), ";
+            params.add(authorUuid);
         }
         sql += "updated_at = ? WHERE id = ?";
         params.add(LocalDateTime.now());
@@ -95,17 +104,17 @@ public class ScheduleJdbcRepository implements ScheduleRepository {
     }
 
     @Override
-    public List<ScheduleResponse> findAll(LocalDate updatedDate, String author) {
+    public List<ScheduleResponse> findAll(LocalDate updatedDate, String authorUuid) {
         String sql = "SELECT * FROM schedules WHERE 1=1";
-        List<Object> params = new ArrayList<>();
 
+        List<Object> params = new ArrayList<>();
         if (updatedDate != null) {
             sql += " AND DATE(updated_at) = ?";
             params.add(updatedDate);
         }
-        if (author != null && !author.isEmpty()) {
-            sql += " AND author = ?";
-            params.add(author);
+        if (authorUuid != null && !authorUuid.isEmpty()) {
+            sql += " AND author = UUID_TO_BIN(?)";
+            params.add(authorUuid);
         }
         sql += " ORDER BY updated_at DESC";
 

@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public class ScheduleResponse {
     private Long id;
     private String task;
-    private String author;
+    private String authorUuid;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

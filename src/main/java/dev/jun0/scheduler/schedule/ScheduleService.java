@@ -20,7 +20,7 @@ public class ScheduleService {
     public ScheduleResponse createSchedule(ScheduleCreateRequest request) {
         return scheduleRepository.save(
                 request.getTask(),
-                request.getAuthor(),
+                request.getAuthorUuid(),
                 request.getPassword()
         );
     }
@@ -32,14 +32,14 @@ public class ScheduleService {
     }
 
     @Transactional(readOnly = true)
-    public List<ScheduleResponse> getSchedules(LocalDate updatedDate, String author) {
-        return scheduleRepository.findAll(updatedDate, author);
+    public List<ScheduleResponse> getSchedules(LocalDate updatedDate, String authorUuid) {
+        return scheduleRepository.findAll(updatedDate, authorUuid);
     }
 
     @Transactional
     public ScheduleResponse patchSchedules(Long id, SchedulePatchRequest request) {
         if (scheduleRepository.isPasswordValid(id, request.getPassword())) {
-            return scheduleRepository.update(id, request.getTask(), request.getAuthor());
+            return scheduleRepository.update(id, request.getTask(), request.getAuthorUuid());
         } else {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
