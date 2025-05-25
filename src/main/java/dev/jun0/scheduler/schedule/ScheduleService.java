@@ -1,5 +1,7 @@
 package dev.jun0.scheduler.schedule;
 
+import dev.jun0.scheduler.exception.InvalidPasswordException;
+import dev.jun0.scheduler.exception.ScheduleNotFoundException;
 import dev.jun0.scheduler.schedule.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,7 +28,7 @@ public class ScheduleService {
     @Transactional(readOnly = true)
     public ScheduleResponse getSchedule(Long id) {
         return scheduleRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("일정을 찾을 수 없습니다"));
+                .orElseThrow(() -> new ScheduleNotFoundException("일정을 찾을 수 없습니다."));
     }
 
     @Transactional(readOnly = true)
@@ -39,7 +41,7 @@ public class ScheduleService {
         if (scheduleRepository.isPasswordValid(id, request.getPassword())) {
             return scheduleRepository.update(id, request.getTask(), request.getAuthorUuid());
         } else {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new InvalidPasswordException("비밀번호가 일치하지 않습니다.");
         }
     }
 
@@ -48,7 +50,7 @@ public class ScheduleService {
         if (scheduleRepository.isPasswordValid(id, request.getPassword())) {
             scheduleRepository.delete(id);
         } else {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new InvalidPasswordException("비밀번호가 일치하지 않습니다.");
         }
     }
 }
